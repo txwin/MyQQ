@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">MyQQ</string>
+    <array name="sex">
+        <item>男</item>
+        <item>女</item>
+    </array>
+    <string-array name="style">
+        <item>吃货</item>
+        <item>爱逛街</item>
+        <item>玩游戏</item>
+        <item>爱运动</item>
+    </string-array>
+    <string-array name="name">
+        <item>孙悟空</item>
+        <item>猪八戒</item>
+        <item>唐僧</item>
+        <item>沙和尚</item>
+        <item>牛魔王</item>
+        <item>蜘蛛精</item>
+        <item>紫霞仙子</item>
+    </string-array>
+    <string-array name="work">
+        <item>打怪</item>
+        <item>吃饭</item>
+        <item>念经</item>
+        <item>挑担</item>
+        <item>兄弟</item>
+        <item>妖怪</item>
+        <item>花痴</item>
+    </string-array>
+    <string-array name="data">
+        <item>发现内容展示</item>
+        <item>我的内容展示</item>
+    </string-array>
+    <string-array name="menu">
+        <item>好友</item>
+        <item>发现</item>
+        <item>我的</item>
+    </string-array>
+</resources>
