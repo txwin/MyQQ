@@ -60,6 +60,7 @@ public class Register extends AppCompatActivity {
                             }
                             progress=0;     //进度值置位
                             progressDialog.dismiss();    //关闭进度对话框
+                            //打包注册信息回LoginActivity
                             bundle=new Bundle();
                             bundle.putString("account",editText_account.getText().toString());
                             bundle.putString("password",editText_password.getText().toString());
