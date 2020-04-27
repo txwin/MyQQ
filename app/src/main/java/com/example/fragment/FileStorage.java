@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FileStorage {
-    public boolean WriteFile(Context context, String filename, String data) {
+    public boolean writeFile(Context context, String filename, String data) {
         try {
             FileOutputStream fileOutputStream = context.openFileOutput(filename,
                     Context.MODE_APPEND);
@@ -34,7 +34,7 @@ public class FileStorage {
         }
     }
 
-    public List<Map<String, Object>> ReadFile(Context context, String filename) {
+    public List<Map<String, Object>> readFile(Context context, String filename) {
         String[] data = new String[2];
         String message;
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
