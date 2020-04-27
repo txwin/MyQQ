@@ -71,8 +71,6 @@ public class Register extends AppCompatActivity {
             public void onClick(View view) {
                 if (!editText_style.getText().toString().equals("") && !editText_account.getText().toString().equals("") && !editText_password.getText().toString().equals("")
                         && !editText_confirm.getText().toString().equals("") && editText_password.getText().toString().equals(editText_confirm.getText().toString())) {
-                    fileStorage.ReadFile(Register.this, "data.txt");
-
                     //判断输入的账号是否已经存在
                     List<Map<String, Object>> list = fileStorage.ReadFile(Register.this, "data" +
                             ".txt");
@@ -100,8 +98,7 @@ public class Register extends AppCompatActivity {
                         progressDialog.show();
 
                         //动态请求写存储权限
-                        requestPermissions(new String[]{"android.permission" +
-                                ".WRITE_EXTERNAL_STORAGE"}, 1);
+                        requestPermissions(new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, 1);
 
                         new Thread() {
                             @Override
@@ -121,19 +118,16 @@ public class Register extends AppCompatActivity {
                                 //打包注册信息回LoginActivity
                                 bundle = new Bundle();
                                 bundle.putString("account", editText_account.getText().toString());
-                                bundle.putString("password",
-                                        editText_password.getText().toString());
+                                bundle.putString("password", editText_password.getText().toString());
                                 intent.putExtra("info", bundle);
                                 setResult(1, intent);
                                 finish();
 
                                 Looper.prepare();   //子线程不会创建Looper，要手动加入消息队列（makeText方法中会创建Handle）
                                 if (Filestate) {
-                                    Toast.makeText(getApplicationContext(), "注册成功！",
-                                            Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "注册成功！", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "注册失败！",
-                                            Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "注册失败！", Toast.LENGTH_SHORT).show();
                                 }
                                 Looper.loop();      //开始工作，之后的代码不会执行
                             }
