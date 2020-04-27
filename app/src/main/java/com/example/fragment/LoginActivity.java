@@ -107,6 +107,10 @@ public class LoginActivity extends AppCompatActivity {
                         //判断账号密码是否与文件中的数据匹配
                         if (!check) {
                             Toast.makeText(LoginActivity.this, "账号和密码错误", Toast.LENGTH_LONG).show();
+                            //当密码账号错误时，如果选上了自动登录则取消，并重写Configuration配置文件
+//                            checkBox2.setChecked(false);
+                            spStorage.writeSP(LoginActivity.this, "Configuration",
+                                    checkBox.isChecked(), false);
                         }
                     } else {
                         Toast.makeText(LoginActivity.this, "不存在账号和密码", Toast.LENGTH_LONG).show();
