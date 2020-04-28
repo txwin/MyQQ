@@ -19,10 +19,20 @@ import java.util.List;
 import java.util.Map;
 
 public class FileStorage {
-    public boolean writeFile(Context context, String filename, String data) {
+    private FileOutputStream fileOutputStream;
+    private FileInputStream fileInputStream;
+
+    //写内部或外部存储
+    public boolean writeFile(Context context, String filename, String data,
+                             boolean isExternalStorage) {
         try {
-            FileOutputStream fileOutputStream = context.openFileOutput(filename,
-                    Context.MODE_APPEND);
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && isExternalStorage) {
+                fileOutputStream =
+                        new FileOutputStream(new File(Environment.getExternalStorageDirectory(),
+                                filename));
+            } else {
+                fileOutputStream = context.openFileOutput(filename, Context.MODE_APPEND);
+            }
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
             writer.write(data);
             writer.flush();
@@ -34,12 +44,19 @@ public class FileStorage {
         }
     }
 
-    public List<Map<String, Object>> readFile(Context context, String filename) {
+    //读内部或外部存储
+    public List<Map<String, Object>> readFile(Context context, String filename, boolean isExternalStorage) {
         String[] data = new String[2];
         String message;
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         try {
-            FileInputStream fileInputStream = context.openFileInput(filename);
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && isExternalStorage) {
+                fileInputStream =
+                        new FileInputStream(new File(Environment.getExternalStorageDirectory(),
+                                filename));
+            } else {
+                fileInputStream = context.openFileInput(filename);
+            }
             BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream));
             while ((message = reader.readLine()) != null) {
                 data = message.split("&");

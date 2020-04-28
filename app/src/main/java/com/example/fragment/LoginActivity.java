@@ -90,7 +90,7 @@ public class LoginActivity extends AppCompatActivity {
                     //判断输入的账号是否存在
                     List<Map<String, Object>> list = fileStorage.readFile(LoginActivity.this,
                             "data" +
-                                    ".txt");
+                                    ".txt", false);
                     //判断文件是否存在，通过ReadFile()方法的返回值获取
                     if (list != null) {
                         for (Map<String, Object> map : list) {

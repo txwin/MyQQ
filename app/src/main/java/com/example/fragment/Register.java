@@ -44,7 +44,7 @@ public class Register extends AppCompatActivity {
                 if (grantResults[x] == PackageManager.PERMISSION_GRANTED) {
                     //采用文件存储方式保存注册用户信息
                     if (fileStorage.writeFile(Register.this, "data.txt",
-                            editText_account.getText().toString() + "&" + editText_password.getText().toString() + "\n")) {
+                            editText_account.getText().toString() + "&" + editText_password.getText().toString() + "\n", false)) {
                         Filestate = true;
                     } else {
                         Filestate = false;
@@ -73,7 +73,7 @@ public class Register extends AppCompatActivity {
                         && !editText_confirm.getText().toString().equals("") && editText_password.getText().toString().equals(editText_confirm.getText().toString())) {
                     //判断输入的账号是否已经存在
                     List<Map<String, Object>> list = fileStorage.readFile(Register.this, "data" +
-                            ".txt");
+                            ".txt", false);
                     //判断文件是否存在，通过ReadFile()方法的返回值获取
                     if (list != null) {
                         for (Map<String, Object> map : list) {
