@@ -9,13 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 public class SPStorage {
-    SharedPreferences sp;
+    private SharedPreferences sp;
+    private SharedPreferences.Editor editor;
 
     //写最后一次用户登录信息
     public boolean write_user_SP(Context context, String filename, String account,
                                  String password) {
         sp = context.getSharedPreferences(filename, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
+        editor = sp.edit();
         editor.putString("account", account);
         editor.putString("password", password);
 
@@ -26,7 +27,7 @@ public class SPStorage {
     public boolean writeSP(Context context, String filename, boolean remember_password,
                            boolean auto_login) {
         sp = context.getSharedPreferences(filename, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
+        editor = sp.edit();
         editor.putBoolean("remember_password", remember_password);
         editor.putBoolean("auto_login", auto_login);
 
