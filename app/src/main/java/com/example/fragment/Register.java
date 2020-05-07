@@ -1,8 +1,11 @@
 package com.example.fragment;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Looper;
 
@@ -10,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,12 +29,15 @@ public class Register extends AppCompatActivity {
     private Button button;
     private Button button_dialog;
     private EditText editText_style, editText_account, editText_password, editText_confirm;
+    private Spinner spinner_sex;
     private String style;
     private Intent intent;
     private Bundle bundle;
     private FileStorage fileStorage = new FileStorage();
     private boolean Filestate = false;
     private boolean registerstate = true;
+    private MySQLiteHelper mySQLiteHelper;
+    private SQLiteDatabase database;
 
     private int progress = 0;
     private boolean log[] = new boolean[]{false, false, false, false};
@@ -58,12 +65,13 @@ public class Register extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        button = (Button) findViewById(R.id.button3);
-        button_dialog = (Button) findViewById(R.id.button_dialog);
-        editText_style = (EditText) findViewById(R.id.editText6);
+        button = findViewById(R.id.button3);
+        button_dialog = findViewById(R.id.button_dialog);
+        editText_style = findViewById(R.id.editText6);
         editText_account = findViewById(R.id.editText3);
         editText_confirm = findViewById(R.id.editText5);
         editText_password = findViewById(R.id.editText4);
+        spinner_sex = findViewById(R.id.spinner);
         intent = getIntent();
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -97,9 +105,29 @@ public class Register extends AppCompatActivity {
                         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                         progressDialog.show();
 
+                        /***********文件方式存储注册信息**********/
                         //动态请求写存储权限
                         requestPermissions(new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, 1);
+                        /***********数据库方式存储注册信息**********/
+                        //往数据库存储数据
+                        mySQLiteHelper = new MySQLiteHelper(Register.this, "data.db", null, 1);
+                        //创建数据库
+                        database = mySQLiteHelper.getReadableDatabase();
+                        //以读写方式打开数据库，如果数据库的磁盘空间满了，就会打开失败，当打开失败后会继续尝试以只读方式打开数据库。如果该问题成功解决，则只读数据库对象就会关闭，然后返回一个可读写的数据库对象。
 
+                        ContentValues contentValues = new ContentValues();    //打包数据库数据
+                        contentValues.put("_id", editText_account.getText().toString());
+                        contentValues.put("password", editText_password.getText().toString());
+                        contentValues.put("style", editText_style.getText().toString());
+                        contentValues.put("sex", spinner_sex.getSelectedItem().toString());
+                        //插入数据
+                        if (database.insert("Message", null, contentValues) != -1) {
+                            Toast.makeText(Register.this, "注册信息保存数据库成功", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(Register.this, "注册信息保存数据库失败", Toast.LENGTH_SHORT).show();
+                        }
+
+                        //进度条对话框开启注册流程
                         new Thread() {
                             @Override
                             public void run() {
