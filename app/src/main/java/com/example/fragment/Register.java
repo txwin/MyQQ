@@ -38,6 +38,7 @@ public class Register extends AppCompatActivity {
     private boolean registerstate = true;
     private MySQLiteHelper mySQLiteHelper;
     private SQLiteDatabase database;
+    private Cursor cursor;
 
     private int progress = 0;
     private boolean log[] = new boolean[]{false, false, false, false};
@@ -79,22 +80,42 @@ public class Register extends AppCompatActivity {
             public void onClick(View view) {
                 if (!editText_style.getText().toString().equals("") && !editText_account.getText().toString().equals("") && !editText_password.getText().toString().equals("")
                         && !editText_confirm.getText().toString().equals("") && editText_password.getText().toString().equals(editText_confirm.getText().toString())) {
+                    /***********文件方式读取注册信息判断账号是否存在**********/
                     //判断输入的账号是否已经存在
-                    List<Map<String, Object>> list = fileStorage.readFile(Register.this, "data" +
-                            ".txt", false);
-                    //判断文件是否存在，通过ReadFile()方法的返回值获取
-                    if (list != null) {
-                        for (Map<String, Object> map : list) {
-                            if (map.get("account").equals(editText_account.getText().toString())) {
-                                Toast.makeText(Register.this, "账号已存在", Toast.LENGTH_SHORT).show();
-                                registerstate = false;
-                                break;
-                            } else {
-                                registerstate = true;
-                            }
+//                    List<Map<String, Object>> list = fileStorage.readFile(Register.this, "data" +
+//                            ".txt", false);
+//                    //判断文件是否存在，通过ReadFile()方法的返回值获取
+//                    if (list != null) {
+//                        for (Map<String, Object> map : list) {
+//                            if (map.get("account").equals(editText_account.getText().toString()
+//                            )) {
+//                                Toast.makeText(Register.this, "账号已存在", Toast.LENGTH_SHORT).show();
+//                                registerstate = false;
+//                                break;
+//                            } else {
+//                                registerstate = true;
+//                            }
+//                        }
+//                    }
+                    /***********数据库方式读取注册信息判断账号是否存在**********/
+                    //创建数据库
+                    mySQLiteHelper = new MySQLiteHelper(Register.this, "data.db", null, 1);
+                    //以读写方式打开数据库，如果数据库的磁盘空间满了，就会打开失败，当打开失败后会继续尝试以只读方式打开数据库。如果该问题成功解决，则只读数据库对象就会关闭，然后返回一个可读写的数据库对象。
+                    database = mySQLiteHelper.getReadableDatabase();
+                    //查询数据库中所有数据
+                    cursor = database.rawQuery("select * from Message", null);
+                    //将Cursor对象的内部指针指向第一行数据
+                    cursor.moveToFirst();
+                    //循环遍历数据库中的所有数据
+                    do {
+                        if (cursor.getString(0).equals(editText_account.getText().toString())) {
+                            Toast.makeText(Register.this, "账号已存在", Toast.LENGTH_SHORT).show();
+                            registerstate = false;
+                            break;
+                        } else {
+                            registerstate = true;
                         }
-                    }
-
+                    } while (cursor.moveToNext());
 
                     //不存在重复账号后注册账号
                     if (registerstate) {
@@ -107,24 +128,37 @@ public class Register extends AppCompatActivity {
 
                         /***********文件方式存储注册信息**********/
                         //动态请求写存储权限
-                        requestPermissions(new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, 1);
+//                        requestPermissions(new String[]{"android.permission" +
+//                                ".WRITE_EXTERNAL_STORAGE"}, 1);
                         /***********数据库方式存储注册信息**********/
-                        //往数据库存储数据
-                        mySQLiteHelper = new MySQLiteHelper(Register.this, "data.db", null, 1);
-                        //创建数据库
-                        database = mySQLiteHelper.getReadableDatabase();
-                        //以读写方式打开数据库，如果数据库的磁盘空间满了，就会打开失败，当打开失败后会继续尝试以只读方式打开数据库。如果该问题成功解决，则只读数据库对象就会关闭，然后返回一个可读写的数据库对象。
-
+                        //以事务方式处理数据库
+                        database.beginTransaction();    //开启事务
                         ContentValues contentValues = new ContentValues();    //打包数据库数据
                         contentValues.put("_id", editText_account.getText().toString());
                         contentValues.put("password", editText_password.getText().toString());
                         contentValues.put("style", editText_style.getText().toString());
                         contentValues.put("sex", spinner_sex.getSelectedItem().toString());
                         //插入数据
-                        if (database.insert("Message", null, contentValues) != -1) {
-                            Toast.makeText(Register.this, "注册信息保存数据库成功", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(Register.this, "注册信息保存数据库失败", Toast.LENGTH_SHORT).show();
+                        try {
+                            //execSQL方法插入数据
+//                            database.execSQL("INSERT INTO Message VALUES (?,?,?,?)",
+//                                    new Object[]{editText_account.getText().toString(),
+//                                            editText_password.getText().toString(),
+//                                            editText_style.getText().toString(),
+//                                            spinner_sex.getSelectedItem().toString()});
+                            //insert方法插入数据
+                            if (database.insert("Message", null, contentValues) != -1) {
+                                Toast.makeText(Register.this, "注册信息保存数据库成功", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(Register.this, "注册信息保存数据库失败", Toast.LENGTH_SHORT).show();
+                            }
+                            database.setTransactionSuccessful();    //提交实务
+                        } catch (Exception e) {
+                            Toast.makeText(Register.this, "数据库存储异常", Toast.LENGTH_SHORT).show();
+                        } finally {
+                            database.endTransaction();      //结束实务
+                            database.close();
+                            contentValues.clear();
                         }
 
                         //进度条对话框开启注册流程
@@ -146,16 +180,19 @@ public class Register extends AppCompatActivity {
                                 //打包注册信息回LoginActivity
                                 bundle = new Bundle();
                                 bundle.putString("account", editText_account.getText().toString());
-                                bundle.putString("password", editText_password.getText().toString());
+                                bundle.putString("password",
+                                        editText_password.getText().toString());
                                 intent.putExtra("info", bundle);
                                 setResult(1, intent);
                                 finish();
 
                                 Looper.prepare();   //子线程不会创建Looper，要手动加入消息队列（makeText方法中会创建Handle）
                                 if (Filestate) {
-                                    Toast.makeText(getApplicationContext(), "注册成功！", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "注册成功！",
+                                            Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "注册失败！", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(), "注册失败！",
+                                            Toast.LENGTH_SHORT).show();
                                 }
                                 Looper.loop();      //开始工作，之后的代码不会执行
                             }
