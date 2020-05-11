@@ -105,17 +105,22 @@ public class Register extends AppCompatActivity {
                     //查询数据库中所有数据
                     cursor = database.rawQuery("select * from Message", null);
                     //将Cursor对象的内部指针指向第一行数据
-                    cursor.moveToFirst();
+                    if (!cursor.isFirst()) {
+                        cursor.moveToFirst();
+                    }
                     //循环遍历数据库中的所有数据
-                    do {
-                        if (cursor.getString(0).equals(editText_account.getText().toString())) {
-                            Toast.makeText(Register.this, "账号已存在", Toast.LENGTH_SHORT).show();
-                            registerstate = false;
-                            break;
-                        } else {
-                            registerstate = true;
-                        }
-                    } while (cursor.moveToNext());
+                    if (cursor.getCount() > 0) {
+                        do {
+                            if (cursor.getString(1).equals(editText_account.getText().toString())) {
+                                Toast.makeText(Register.this, "账号已存在", Toast.LENGTH_SHORT).show();
+                                registerstate = false;
+                                break;
+                            } else {
+                                registerstate = true;
+                            }
+                        } while (cursor.moveToNext());
+                        cursor.close();
+                    }
 
                     //不存在重复账号后注册账号
                     if (registerstate) {
@@ -134,23 +139,24 @@ public class Register extends AppCompatActivity {
                         //以事务方式处理数据库
                         database.beginTransaction();    //开启事务
                         ContentValues contentValues = new ContentValues();    //打包数据库数据
-                        contentValues.put("_id", editText_account.getText().toString());
+                        contentValues.put("account", editText_account.getText().toString());
                         contentValues.put("password", editText_password.getText().toString());
                         contentValues.put("style", editText_style.getText().toString());
                         contentValues.put("sex", spinner_sex.getSelectedItem().toString());
                         //插入数据
                         try {
                             //execSQL方法插入数据
-//                            database.execSQL("INSERT INTO Message VALUES (?,?,?,?)",
+//                            database.execSQL("INSERT INTO Message (account,password,style,sex)
+//                            VALUES (?,?,?,?)",
 //                                    new Object[]{editText_account.getText().toString(),
 //                                            editText_password.getText().toString(),
 //                                            editText_style.getText().toString(),
 //                                            spinner_sex.getSelectedItem().toString()});
                             //insert方法插入数据
                             if (database.insert("Message", null, contentValues) != -1) {
-                                Toast.makeText(Register.this, "注册信息保存数据库成功", Toast.LENGTH_SHORT).show();
+                                Filestate = true;
                             } else {
-                                Toast.makeText(Register.this, "注册信息保存数据库失败", Toast.LENGTH_SHORT).show();
+                                Filestate = false;
                             }
                             database.setTransactionSuccessful();    //提交实务
                         } catch (Exception e) {
@@ -161,7 +167,7 @@ public class Register extends AppCompatActivity {
                             contentValues.clear();
                         }
 
-                        //进度条对话框开启注册流程
+                        //进度条对话框开启注册流程(模拟注册耗时)
                         new Thread() {
                             @Override
                             public void run() {
@@ -209,42 +215,6 @@ public class Register extends AppCompatActivity {
         button_dialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*****单选对话框*******/
-//                new AlertDialog.Builder(register.this).setTitle("个性签名")
-//                        .setIcon(getResources().getDrawable(R.drawable.myicon))
-//                        .setSingleChoiceItems(getResources().getStringArray(R.array.style), -1,
-//                        new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i) {
-//                        style=getResources().getStringArray(R.array.style)[i];
-//                    }
-//                }).setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i) {
-//                        editText.setText(style);
-//                    }
-//                }).setNegativeButton("退出",null).create().show();
-                /*****多选对话框*******/
-//                new AlertDialog.Builder(register.this).setTitle("个性签名")
-//                        .setIcon(R.drawable.myicon).setMultiChoiceItems(getResources()
-//                        .getStringArray(R.array.style), log, new DialogInterface
-//                        .OnMultiChoiceClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i, boolean b) {
-//                        log[i]=b;
-//                    }
-//                }).setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i) {
-//                        editText.setText("");
-//                        for(int x=0;x<getResources().getStringArray(R.array.style).length;x++){
-//                            if(log[x]){
-//                                editText.append(getResources().getStringArray(R.array.style)
-//                                [x]+",");
-//                            }
-//                        }
-//                    }
-//                }).setNegativeButton("退出",null).create().show();
                 /*****自定义对话框*******/
                 Reg_style_Dialog regStyleDialog = new Reg_style_Dialog(Register.this,
                         new Reg_style_Dialog.Reg_style_Dialog_listener() {

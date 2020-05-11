@@ -17,7 +17,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table Message (_id varchar(20) primary key,password varchar(20),style " +
+        db.execSQL("create table Message (_id integer primary key autoincrement ,account varchar" +
+                "(20) ,password varchar(20),style " +
                 "varchar(100),sex varchar(2))");
     }
 

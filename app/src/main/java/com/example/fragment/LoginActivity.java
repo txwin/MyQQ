@@ -131,21 +131,27 @@ public class LoginActivity extends AppCompatActivity {
                     mySQLiteHelper = new MySQLiteHelper(LoginActivity.this, "data.db", null, 1);  //获取数据库
                     database = mySQLiteHelper.getReadableDatabase();
                     cursor = database.rawQuery("select * from Message", null);      //查询数据库中所有数据
-                    cursor.moveToFirst();       //将Cursor对象的内部指针指向第一行数据
+                    //将Cursor对象的内部指针指向第一行数据
+                    if (!cursor.isFirst()) {
+                        cursor.moveToFirst();
+                    }
                     //从Cursor对象中取出查询到的数据
-                    do {
-                        if (cursor.getString(0).equals(editText_account.getText().toString()) && cursor.getString(1).equals(editText_password.getText().toString())) {
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                            check = true;
-                            break;
-                        } else {
-                            check = false;
-                        }
-                    } while (cursor.moveToNext());
-                    cursor.close();
+                    if (cursor.getCount() > 0) {
+                        do {
+                            if (cursor.getString(1).equals(editText_account.getText().toString()) && cursor.getString(2).equals(editText_password.getText().toString())) {
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                                check = true;
+                                break;
+                            } else {
+                                check = false;
+                            }
+                        } while (cursor.moveToNext());
+                        cursor.close();
+                    }
 
+                    //没有查询到账号和密码匹配后做提示
                     if (!check) {
                         Toast.makeText(LoginActivity.this, "账号和密码错误", Toast.LENGTH_LONG).show();
                         //当密码账号错误时，如果选上了自动登录则取消，并重写Configuration配置文件
@@ -153,8 +159,6 @@ public class LoginActivity extends AppCompatActivity {
                         spStorage.writeSP(LoginActivity.this, "Configuration",
                                 checkBox.isChecked(), false);
                     }
-//                    cursor=database.rawQuery("select * from Message where sex=? and _id=?", new
-//                    String[]{"女","12"});
                 } else {
                     Toast.makeText(LoginActivity.this, "配置信息保存失败", Toast.LENGTH_LONG).show();
                 }
