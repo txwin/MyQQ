@@ -12,6 +12,7 @@ public class MyContentProvider extends ContentProvider {
     private SQLiteDatabase database;
     private static UriMatcher uriMatcher;
     private Cursor cursor;
+    private int tag;
 
     //初始化UriMatcher
     static {
@@ -26,7 +27,11 @@ public class MyContentProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         // Implement this to handle requests to delete one or more rows.
         if (uriMatcher.match(uri) == 1) {
-            return database.delete("Message", selection, selectionArgs);
+            tag = database.delete("Message", selection, selectionArgs);
+            if (tag != 0) {
+                getContext().getContentResolver().notifyChange(uri, null);
+            }
+            return tag;
         } else {
             return 0;
         }
@@ -43,7 +48,9 @@ public class MyContentProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         // TODO: Implement this to handle requests to insert a new row.
         if (uriMatcher.match(uri) == 1) {
-            database.insert("Message", null, values);
+            if (database.insert("Message", null, values) != -1) {
+                getContext().getContentResolver().notifyChange(uri, null);
+            }
         }
         return uri;
     }
@@ -72,7 +79,13 @@ public class MyContentProvider extends ContentProvider {
                       String[] selectionArgs) {
         // TODO: Implement this to handle requests to update one or more rows.
         if (uriMatcher.match(uri) == 1) {
-            return database.update("Message", values, selection, selectionArgs);
+            tag = database.update("Message", values, selection, selectionArgs);
+            if (tag != -1) {
+                getContext().getContentResolver().notifyChange(uri, null);
+                return tag;
+            } else {
+                return -1;
+            }
         } else {
             return -1;
         }
