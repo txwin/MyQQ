@@ -30,8 +30,10 @@ public class MyContentProvider extends ContentProvider {
             tag = database.delete("Message", selection, selectionArgs);
             if (tag != 0) {
                 getContext().getContentResolver().notifyChange(uri, null);
+                return tag;
+            } else {
+                return 0;
             }
-            return tag;
         } else {
             return 0;
         }
